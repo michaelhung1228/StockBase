@@ -1,0 +1,366 @@
+<html><head><script async="" src="https://www.google-analytics.com/analytics.js"></script><script language="JavaScript">
+function encodeField(str) {
+  	strfield = str;
+  	if (strfield != "") {
+  		strfield = strfield.replace(/</g,"").replace(/>/g,"").replace(/\"/g,"").replace(/%/g,"").replace(/;/g,"").replace(/alert/g,"").replace(/SELECT/g,"").replace(/select/g,"");
+  	}
+  	return strfield;
+}
+</script>
+
+
+
+
+
+<title>股務部資訊平台-集保戶股權分散表查詢</title>
+<meta http-equiv="Content-Type" content="text/html; charset=MS950">
+
+<script type="text/javascript" src="/smWeb/jquery/jquery-1.8.0.min.js"></script>
+<script language="JavaScript">
+	function getSelScaDates() {
+  	  	$.ajax({
+			url:'QryStockAjax.do',
+			type:'POST',
+			contentType : 'application/x-www-form-urlencoded;charset=UTF8',
+			dataType:'JSON',
+			data: {
+				REQ_OPR: "qrySelScaDates"
+			},
+			error: function() {
+				console.log("error");
+			},
+			success: function(datas) {
+				var temp = '&nbsp;&nbsp;資料日期&nbsp;<select id="scaDates" name="scaDates" onchange="selScaDate();">';
+				//var temp = '&nbsp;&nbsp;資料日期&nbsp;<select id="scaDates" name="scaDates" onchange="selScaDate();"><option value=""></option>';
+				if(datas.length > 0){
+					document.Qform.scaDate.value = datas[0];
+				    for(var i = 0; i < datas.length; i++){
+				    	temp += '<option VALUE="' + datas[i] + '">' + datas[i] + '</option>';
+				    }
+				} else {
+					temp += '<option value=""></option>';
+				}
+				$("#tdOptionScaDts").html(temp);
+			}
+		});			
+
+	}
+  	function stockNoOnChange() { 
+  	  $("#tdRadioStockName").html("");
+  	  if (checkInput() == true) {
+  	  	$.ajax({
+			url:'QryStockAjax.do',
+			type:'POST',
+			contentType : 'application/x-www-form-urlencoded;charset=UTF8',
+			dataType:'JSON',
+			data: {
+				REQ_OPR: "qryStockNo",
+				stockNo: $("#StockNo").val()
+			},
+			error: function() {
+				console.log("error");
+			},
+			success: function(datas) {
+				if(datas.length > 0){
+				    var temp = '<INPUT TYPE="radio" NAME="radioStockNo" VALUE="' + datas[0] + '" checked>' + datas[0] + '<br>';
+				    for(var i = 1; i < datas.length; i++){
+				    	temp += '<INPUT TYPE="radio" NAME="radioStockNo" VALUE="' + datas[i] + '">' + datas[i] + '<br>';
+				    }
+					$("#tdRadioStockNo").html(temp);
+				}else{
+					$("#tdRadioStockNo").html("");
+				}
+			}
+		});
+	  }
+  	}
+  	
+  	function stockNameOnChange() {
+  		$("#tdRadioStockNo").html("");
+  		if (checkInput() == true) {
+  	  	$.ajax({
+			url:'QryStockAjax.do',
+			type:'POST',
+			contentType : 'application/x-www-form-urlencoded;charset=UTF8',
+			dataType:'JSON',
+			data: {
+				REQ_OPR: "qryStockName",
+				stockName: $("#StockName").val(),
+				scaDate: $("#scaDate").val()
+			},
+			error: function() {
+				console.log("error");
+			},
+			success: function(datas) {
+				if(datas.length > 0){
+				    var temp = '<INPUT TYPE="radio" NAME="radioStockName" VALUE="' + datas[0] + '" checked>' + datas[0] + '<br>';
+				    for(var i = 1; i < datas.length; i++){
+				    	temp += '<INPUT TYPE="radio" NAME="radioStockName" VALUE="' + datas[i] + '">' + datas[i] + '<br>';
+				    }
+					$("#tdRadioStockName").html(temp);
+				}else{
+					$("#tdRadioStockName").html("");
+				}
+			}
+		});
+	  }
+  	}
+
+  	function radioChg() {
+     	document.Qform.SqlMethod[0].checked=true;
+     	document.Qform.SqlMethod[1].checked=false;
+     	document.Qform.StockNo.value="";
+  	}
+  
+  	function radioChg1() {
+     	document.Qform.SqlMethod[0].checked=false;
+     	document.Qform.SqlMethod[1].checked=true;
+     	document.Qform.StockName.value="";
+  	}
+
+  	function checkInput() {
+  		var patn1=/\?/;
+  		var patn2=/@/;
+  		var patn3=/%/; 	  		   		  		 		
+
+     	if ( document.Qform.SqlMethod[0].checked==true) {
+     		if  (document.Qform.StockNo.value=="" ){
+         		alert("請輸入證券代號！"  );
+         		document.Qform.StockNo.focus();
+         		return false;
+         	} else if (document.Qform.StockNo.value.search(patn1)> 0 
+         	|| document.Qform.StockNo.value.search(patn2)> 0
+         	|| document.Qform.StockNo.value.search(patn3)> 0 ) {
+         		alert("證券代號輸入錯誤！"  );
+         		document.Qform.StockNo.focus();
+         		return false;
+           	} else if (!isDigitOrLetter(document.Qform.StockNo.value)) {
+         		alert("證券代號輸入錯誤！"  );
+         		document.Qform.StockNo.focus();
+         		return false;      	
+         	}
+     	} else if ( document.Qform.SqlMethod[1].checked==true) {
+     		if (document.Qform.StockName.value=="" )  {
+         		alert("請輸入證券名稱！"  );
+         		document.Qform.StockName.focus();
+         		return false;
+         	} else if (document.Qform.StockName.value.search(patn1)> 0 
+         	|| document.Qform.StockName.value.search(patn2)> 0
+         	|| document.Qform.StockName.value.search(patn3)> 0  ) {
+         		alert("證券名稱輸入錯誤！"  );
+         		document.Qform.StockName.focus();
+         		return false;
+         	}      		
+     	}
+     	
+    	document.Qform.StockNo.value = encodeField(document.Qform.StockNo.value);
+	    document.Qform.StockName.value = encodeField(document.Qform.StockName.value);
+	    document.Qform.scaDate.value = encodeField(document.Qform.scaDate.value);    
+	         	
+     	return true;
+	} 
+  	function preSubmit() {
+     	if ( document.Qform.SqlMethod[0].checked==true) {
+     		if (document.Qform.radioStockNo != null) {
+     			if (document.Qform.radioStockNo.value != undefined)	{
+     				document.Qform.clkStockNo.value = document.Qform.radioStockNo.value;
+	     		} else {
+    	 			for (var i=0; i<document.Qform.radioStockNo.length; i++) {
+     					if (document.Qform.radioStockNo[i].checked == true) {
+     						document.Qform.clkStockNo.value = document.Qform.radioStockNo[i].value;
+     						break;
+     					}
+     				}
+     			}
+     		} else {
+     			document.Qform.clkStockNo.value = document.Qform.StockNo.value;
+     		}
+     	} 
+     	
+     	if ( document.Qform.SqlMethod[1].checked==true) {
+     		if (document.Qform.radioStockName != null ) {     		
+     			if (document.Qform.radioStockName.value != undefined)	{
+     				document.Qform.clkStockName.value = document.Qform.radioStockName.value;    		
+     			} else {
+     				for (var i=0; i<document.Qform.radioStockName.length; i++) {
+     					if (document.Qform.radioStockName[i].checked == true) {
+    	 					document.Qform.clkStockName.value = document.Qform.radioStockName[i].value;
+	      					break;
+     					}
+     				}
+     			}
+     		} else {
+     			document.Qform.clkStockName.value = document.Qform.StockName.value;
+     		}
+     	}
+		document.Qform.submit();
+  	}
+  	
+  	function selScaDate() {
+  		var tmpScaDt = document.getElementById("scaDates").value;
+  		if  (tmpScaDt!="" ){
+  			document.Qform.scaDate.value = tmpScaDt;
+  		}
+  	}
+
+  	function isDigitOrLetter(str){
+  	 	var theMask = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	 	if (str == null || str == '') { 
+	 		return false;
+	 	}
+	 	var len = str.length;
+	 	for(var i=0;i<len;i++){
+	 		var s = str.substring(i,i+1);
+	 		if(theMask.indexOf(s) == -1) 
+	 			return false;
+	 	}
+	 	return(true);
+  	}
+
+</script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-87672847-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+
+<style type="text/css">
+  .head
+{
+    FONT-SIZE: 20px;
+    TEXT-ALIGN: center
+	;  line-height: 28pt; font-family: "標楷體","Arial", "Helvetica", "sans-serif"
+}
+
+  .mt
+{
+    FONT-SIZE: 12px
+	;  line-height: 16pt; font-family: "Arial", "Helvetica", "sans-serif"
+}
+
+.bwl9
+{
+    BACKGROUND-COLOR: #ffffff;
+    COLOR: #333333;
+    FONT-SIZE: 12px;
+    TEXT-ALIGN: left
+; line-height: 16pt; font-family: "Arial", "Helvetica", "sans-serif"
+}
+
+.bw09
+{
+    BACKGROUND-COLOR: #ffffff;
+    COLOR: #333333;
+    FONT-SIZE: 16px;
+    TEXT-ALIGN: left
+; line-height: 16pt; font-family: "Arial", "Helvetica", "sans-serif"
+}
+.bwr9
+{
+    BACKGROUND-COLOR: #ffffff;
+    COLOR: #333333;
+    FONT-SIZE: 12px;
+    TEXT-ALIGN: right
+; line-height: 16pt; font-family: "Arial", "Helvetica", "sans-serif"
+}
+
+.wuc9
+{
+    BACKGROUND-COLOR: #DCE8F8;
+    FONT-SIZE: 12px;
+    TEXT-ALIGN: center
+; line-height: 16pt; font-family: "Arial", "Helvetica", "sans-serif"
+}
+
+.f9
+{
+    FONT-SIZE: 12px;
+    TEXT-ALIGN: center
+; line-height: 16pt; font-family: "Arial", "Helvetica", "sans-serif"
+}
+</style>
+</head>
+
+
+<body onload="getSelScaDates();">
+
+<form method="POST" action="QryStockAjax.do" name="Qform" id="Qform">
+  <table cellspacing="0" cellpadding="0" width="80%" border="0">
+    <tbody><tr>
+      <td>
+        <table cellspacing="0" cellpadding="0" width="100%" border="0">
+          <tbody>
+            <tr>
+              <td class="head"><b>集保戶股權分散表查詢<b></b></b></td>
+            </tr>
+          </tbody> 
+        </table>
+
+        <table cellspacing="0" cellpadding="0" width="100%" border="1" class="mt" bordercolor="#B0CAFF" style="">
+          <tbody>
+            <tr class="bwl9">
+              <td width="20%" class="wuc9">查詢方式</td>
+              <td width="80%">
+                <table width="100%" style="border: solid; border-width: 0px;">
+                  <tbody><tr class="bwl9">
+                      	<td id="tdOptionScaDts" style="border: solid; border-width: 1px" width="60%">&nbsp;&nbsp;資料日期&nbsp;<select id="scaDates" name="scaDates" onchange="selScaDate();"><option value="20190705">20190705</option><option value="20190628">20190628</option><option value="20190621">20190621</option><option value="20190614">20190614</option><option value="20190606">20190606</option><option value="20190531">20190531</option><option value="20190524">20190524</option><option value="20190517">20190517</option><option value="20190510">20190510</option><option value="20190503">20190503</option><option value="20190426">20190426</option><option value="20190419">20190419</option><option value="20190412">20190412</option><option value="20190403">20190403</option><option value="20190329">20190329</option><option value="20190322">20190322</option><option value="20190315">20190315</option><option value="20190308">20190308</option><option value="20190227">20190227</option><option value="20190223">20190223</option><option value="20190215">20190215</option><option value="20190201">20190201</option><option value="20190125">20190125</option><option value="20190119">20190119</option><option value="20190111">20190111</option><option value="20190104">20190104</option><option value="20181228">20181228</option><option value="20181222">20181222</option><option value="20181214">20181214</option><option value="20181207">20181207</option><option value="20181130">20181130</option><option value="20181123">20181123</option><option value="20181116">20181116</option><option value="20181109">20181109</option><option value="20181102">20181102</option><option value="20181026">20181026</option><option value="20181019">20181019</option><option value="20181012">20181012</option><option value="20181005">20181005</option><option value="20180928">20180928</option><option value="20180921">20180921</option><option value="20180914">20180914</option><option value="20180907">20180907</option><option value="20180831">20180831</option><option value="20180824">20180824</option><option value="20180817">20180817</option><option value="20180810">20180810</option><option value="20180803">20180803</option><option value="20180727">20180727</option><option value="20180720">20180720</option><option value="20180713">20180713</option><option value="20180706">20180706</option><option value="20180629">20180629</option><option value="20180622">20180622</option><option value="20180615">20180615</option><option value="20180608">20180608</option><option value="20180601">20180601</option><option value="20180525">20180525</option><option value="20180518">20180518</option><option value="20180511">20180511</option><option value="20180504">20180504</option><option value="20180427">20180427</option><option value="20180420">20180420</option><option value="20180413">20180413</option><option value="20180403">20180403</option><option value="20180331">20180331</option><option value="20180323">20180323</option><option value="20180316">20180316</option><option value="20180309">20180309</option><option value="20180302">20180302</option><option value="20180223">20180223</option><option value="20180214">20180214</option><option value="20180209">20180209</option><option value="20180202">20180202</option><option value="20180126">20180126</option><option value="20180119">20180119</option><option value="20180112">20180112</option><option value="20180105">20180105</option><option value="20171229">20171229</option><option value="20171222">20171222</option><option value="20171215">20171215</option><option value="20171208">20171208</option><option value="20171201">20171201</option><option value="20171124">20171124</option><option value="20171117">20171117</option><option value="20171110">20171110</option><option value="20171103">20171103</option><option value="20171027">20171027</option><option value="20171020">20171020</option><option value="20171013">20171013</option><option value="20171006">20171006</option></select></td>
+                      	<input type="hidden" name="scaDate" id="scaDate" value="20190705">                 
+                  </tr>
+                  <tr class="bwl9">
+                    <td style="border: solid; border-width: 1px; vertical-align: top;" width="60%">&nbsp;
+                      <input type="radio" name="SqlMethod" value="StockNo" checked="">證券代號  
+                      <input type="text" id="StockNo" name="StockNo" value="" size="14" maxlength="6" onclick="radioChg();" onchange="stockNoOnChange()">
+                    </td>
+                    <td id="tdRadioStockNo" style="border: solid; border-width: 1px" width="40%">
+                    </td>
+                  </tr>
+                  <tr class="bwl9">
+                    <td style="border: solid; border-width: 1px; vertical-align: top;" width="60%">&nbsp;
+                      <input type="radio" name="SqlMethod" value="StockName">證券名稱
+                      <input type="text" id="StockName" name="StockName" value="" size="14" maxlength="14" onclick="radioChg1();" onchange="stockNameOnChange()">
+                    </td>
+                    <td id="tdRadioStockName" style="border: solid; border-width: 1px" width="40%">
+                    </td>
+                  </tr>
+                  <tr class="bwl9">
+                    <td id="tdOptionScaDts" style="border: solid; border-width: 1px" width="80%">
+                  		<font color="red">若有多檔證券查詢需求，可至「本公司官網 －＞ 下載專區 －＞  開放資料專區－＞ 股務資訊 －＞ <a href="//smart.tdcc.com.tw/opendata/getOD.ashx?id=1-5">股權分散表</a>」下載</font>
+                  	</td>
+                  </tr>
+                </tbody></table>       
+              </td>
+            </tr>
+          </tbody> 
+        </table>
+        <table cellspacing="0" cellpadding="0" width="100%" border="0">
+          <tbody>
+            <tr>
+              <td class="f9" height="30">
+                <input type="button" value="查詢" name="sub" onclick="preSubmit();">
+                <input type="reset" value="清除">
+                <input type="hidden" name="REQ_OPR" value="SELECT">    
+                <input type="hidden" name="clkStockNo" value="">
+                <input type="hidden" name="clkStockName" value="">          
+              </td>
+            </tr>
+          </tbody> 
+        </table>
+<!--
+        <table cellspacing=0 cellpadding=0 width="100%" border=0>
+          <tbody>
+            <tr>
+              <td height="100" valign="top">
+              	<div align="center"><a href="http://event.data.gov.tw/reward/vote_info/4#container" target="_blank"><img src="images/adbanner-107A.jpg"></a></div>
+             	</td>
+            </tr>
+          </tbody> 
+        </table>        
+-->
+            </td></tr></tbody></table></form></body></html>
